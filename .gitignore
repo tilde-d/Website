@@ -1,0 +1,14 @@
+# Hugo build output — never commit this; Actions builds it
+/public/
+/resources/_gen/
+.hugo_build.lock
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Dart Sass / node if you add tooling later
+node_modules/

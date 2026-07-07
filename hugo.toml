@@ -1,0 +1,130 @@
+baseURL = "https://mattswann.dev/"
+languageCode = "en-us"
+title = "Matt Swann — Detection Engineering & Threat Intel"
+theme = "PaperMod"
+
+# Show drafts locally with `hugo server -D`. GitHub Actions builds without drafts.
+buildDrafts = false
+buildFuture = false
+buildExpired = false
+
+enableRobotsTXT = true
+enableEmoji = true
+enableInlineShortcodes = true
+
+# Pagination (Hugo 0.128+ syntax)
+[pagination]
+  pagerSize = 10
+
+# ---------------------------------------------------------------------------
+# Syntax highlighting (Chroma). This is what gives you Medium-style code blocks,
+# only better: dozens of languages, line numbers, and a real color theme.
+# ---------------------------------------------------------------------------
+[markup]
+  [markup.highlight]
+    noClasses = false          # use CSS classes so the theme's light/dark mode both work
+    codeFences = true
+    guessSyntax = true
+    lineNos = false            # set true if you want line numbers on every block
+    lineNumbersInTable = true
+    tabWidth = 2
+  [markup.goldmark.renderer]
+    unsafe = true              # allow raw HTML in markdown (needed for some embeds)
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+    ordered = false
+
+# ---------------------------------------------------------------------------
+# PaperMod theme params
+# ---------------------------------------------------------------------------
+[params]
+  env = "production"
+  description = "Detection engineering, threat intelligence, and malware analysis by Matt Swann."
+  author = "Matt Swann"
+  defaultTheme = "auto"        # auto | light | dark
+  disableThemeToggle = false
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true   # one-click copy on every code block
+  ShowWordCount = false
+  ShowToc = true
+  TocOpen = false
+  comments = false
+  hideMeta = false
+  ShowRssButtonInSectionTermList = true
+
+  [params.profileMode]
+    enabled = false            # using homeInfoMode instead (see below)
+
+  # The landing-page intro block. Edit this copy to taste.
+  [params.homeInfoParams]
+    Title = "Matt Swann"
+    Content = """
+Cyber intelligence analyst and detection engineer. I write about turning threat intelligence into detection logic — KQL, malware analysis, and detection-as-code across the Microsoft security stack.
+
+Browse the series below, or start with the latest post.
+"""
+
+  # Social / profile links shown on the homepage and footer.
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/tilde-d"
+  [[params.socialIcons]]
+    name = "linkedin"
+    url = "https://www.linkedin.com/in/YOUR-LINKEDIN-SLUG/"
+  [[params.socialIcons]]
+    name = "email"
+    url = "mailto:matt@mattswann.dev"
+  [[params.socialIcons]]
+    name = "rss"
+    url = "index.xml"
+
+  [params.assets]
+    disableHLJS = true         # we use Hugo's Chroma, not highlight.js
+    favicon = "/favicon.ico"
+
+# ---------------------------------------------------------------------------
+# Navigation menu
+# ---------------------------------------------------------------------------
+[menu]
+  [[menu.main]]
+    identifier = "deep-dive"
+    name = "Detection Deep Dive"
+    url = "/tags/detection-deep-dive/"
+    weight = 10
+  [[menu.main]]
+    identifier = "raas"
+    name = "RaaS Teardown"
+    url = "/tags/raas-teardown/"
+    weight = 20
+  [[menu.main]]
+    identifier = "deobfuscation"
+    name = "Deobfuscation Lab"
+    url = "/tags/deobfuscation-lab/"
+    weight = 30
+  [[menu.main]]
+    identifier = "dac"
+    name = "Detection-as-Code"
+    url = "/tags/detection-as-code/"
+    weight = 40
+  [[menu.main]]
+    identifier = "archive"
+    name = "Archive"
+    url = "/archives/"
+    weight = 50
+  [[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags/"
+    weight = 60
+
+# Output an archive page and RSS
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[taxonomies]
+  tag = "tags"
+  series = "series"
