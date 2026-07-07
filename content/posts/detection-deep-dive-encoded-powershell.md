@@ -1,7 +1,7 @@
 +++
 title = "Detection Deep Dive: Encoded PowerShell Commands (T1059.001)"
 date = 2026-07-07T09:00:00-06:00
-draft = true
+draft = false
 summary = "The first entry in the Detection Deep Dive series: mapping encoded PowerShell execution to detection logic in Microsoft Defender, tuning out the false positives, and knowing what the detection can't see."
 tags = ["detection-deep-dive", "kql", "powershell", "mitre-attack", "defender"]
 series = ["Detection Deep Dive"]
