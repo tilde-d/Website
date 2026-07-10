@@ -55,6 +55,7 @@ enableInlineShortcodes = true
   comments = false
   hideMeta = false
   ShowRssButtonInSectionTermList = true
+  images = ["/og-image.png"]
 
   [params.profileMode]
     enabled = false            # using homeInfoMode instead (see below)
@@ -65,7 +66,7 @@ enableInlineShortcodes = true
     Content = """
 Cyber intelligence analyst and detection engineer. I write about turning threat intelligence into detection logic — KQL, malware analysis, and detection-as-code across the Microsoft security stack.
 
-Browse the series below, or start with the latest post.
+Browse the series below, try the [interactive tools](/tools/) I've built, or start with the latest post.
 """
 
   # Social / profile links shown on the homepage and footer.
@@ -74,7 +75,7 @@ Browse the series below, or start with the latest post.
     url = "https://github.com/tilde-d"
   [[params.socialIcons]]
     name = "linkedin"
-    url = "https://www.linkedin.com/in/YOUR-LINKEDIN-SLUG/"
+    url = "https://www.linkedin.com/in/mattcswann/"
   [[params.socialIcons]]
     name = "email"
     url = "mailto:matt@mattswann.dev"
@@ -90,6 +91,11 @@ Browse the series below, or start with the latest post.
 # Navigation menu
 # ---------------------------------------------------------------------------
 [menu]
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 5
   [[menu.main]]
     identifier = "deep-dive"
     name = "Detection Deep Dive"
@@ -110,6 +116,11 @@ Browse the series below, or start with the latest post.
     name = "Detection-as-Code"
     url = "/tags/detection-as-code/"
     weight = 40
+  [[menu.main]]
+    identifier = "tools"
+    name = "Tools"
+    url = "/tools/"
+    weight = 45
   [[menu.main]]
     identifier = "archive"
     name = "Archive"

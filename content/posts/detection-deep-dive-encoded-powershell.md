@@ -7,7 +7,7 @@ tags = ["detection-deep-dive", "kql", "powershell", "mitre-attack", "defender"]
 series = ["Detection Deep Dive"]
 +++
 
-This is the first post in **Detection Deep Dive**, a series where I take a single ATT&CK technique, trace how real adversaries use it, build the detection logic, and — the part most write-ups skip — say plainly what the detection *won't* catch.
+This is the first post in **Detection Deep Dive**, a series where I take a single ATT&CK technique, trace how real adversaries use it, build the detection logic, and, most importantly, highlight plainly what the detection *won't* catch.
 
 We're starting with one of the most abused sub-techniques in the matrix: **encoded PowerShell command execution**, [T1059.001](https://attack.mitre.org/techniques/T1059/001/).
 
@@ -37,13 +37,7 @@ DeviceProcessEvents
 | where FileName in~ ("powershell.exe", "pwsh.exe")
 | where ProcessCommandLine matches regex @"(?i)\s-e(nc(odedcommand)?)?\s"
 | extend AccountUpn = tostring(AccountName)
-| project
-    Timestamp,
-    DeviceName,
-    AccountUpn,
-    ProcessCommandLine,
-    InitiatingProcessFileName,
-    InitiatingProcessCommandLine
+| project Timestamp, DeviceName, AccountUpn, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
 | sort by Timestamp desc
 ```
 

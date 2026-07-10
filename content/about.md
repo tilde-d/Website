@@ -17,6 +17,6 @@ This site is where I turn threat intelligence into detection logic: KQL detectio
 - **Deobfuscation Lab** — static analysis walkthroughs: unpacking obfuscation in scripts and binaries.
 - **Detection-as-Code** — building a CI/CD pipeline that makes a Git repo the source of truth for detections.
 
-Everything here is my own work and opinion, not my employer's.
+Everything here is my own work and opinion.
 
-**Find me:** [GitHub](https://github.com/tilde-d) · [LinkedIn](https://www.linkedin.com/in/YOUR-LINKEDIN-SLUG/) · [matt@mattswann.dev](mailto:matt@mattswann.dev)
+**Find me:** [GitHub](https://github.com/tilde-d) · [LinkedIn](https://www.linkedin.com/in/mattcswann/) · [matt@mattswann.dev](mailto:matt@mattswann.dev)

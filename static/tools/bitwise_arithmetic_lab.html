@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitwise Lab — boolean & MBA explorer</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #131a24;
+    --panel-2: #1a2330;
+    --line: #243040;
+    --line-bright: #324358;
+    --ink: #c9d4e0;
+    --ink-dim: #7c8b9e;
+    --ink-faint: #54637a;
+    --accent: #59c2b8;      /* teal — the "on/1" colour */
+    --accent-dim: #2a5a56;
+    --zero: #46566b;        /* muted — the "off/0" colour */
+    --warn: #e3a857;        /* amber — carries / highlights */
+    --bad: #d2706b;         /* coral — differing bits */
+    --good: #7cb87c;        /* green — matching bits */
+    --mono: 'SF Mono','JetBrains Mono','Fira Code',ui-monospace,'Cascadia Code',Menlo,Consolas,monospace;
+    --r: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px 16px 80px;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(89,194,184,0.05), transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(227,168,87,0.04), transparent 35%);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .title {
+    font-size: 21px; font-weight: 600; letter-spacing: -0.3px;
+    color: #fff; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    text-shadow: 0 0 14px rgba(89,194,184,0.25);
+  }
+  .title .blink { color: var(--accent); animation: blink 1.1s steps(2,start) infinite; }
+  @keyframes blink { to { opacity: 0; } }
+  .subtitle { color: var(--ink-dim); font-size: 13px; margin-top: 4px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .panel-label {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 2.5px;
+    color: var(--accent); margin-bottom: 14px; display: flex;
+    align-items: center; gap: 9px; font-weight: 600;
+    text-shadow: 0 0 8px rgba(89,194,184,0.55), 0 0 18px rgba(89,194,184,0.30);
+  }
+  .panel-label::before {
+    content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+    box-shadow: 0 0 6px rgba(89,194,184,0.9);
+  }
+
+  /* ---- controls row ---- */
+  .controls { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-end; }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-group > label { font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  .seg { display: inline-flex; border: 1px solid var(--line-bright); border-radius: 6px; overflow: hidden; }
+  .seg button {
+    background: var(--panel-2); color: var(--ink-dim); border: none;
+    font-family: var(--mono); font-size: 13px; padding: 7px 13px; cursor: pointer;
+    border-right: 1px solid var(--line); transition: all .12s;
+  }
+  .seg button:last-child { border-right: none; }
+  .seg button:hover { color: var(--ink); background: #202c3a; }
+  .seg button.active { background: var(--accent-dim); color: #d4f5f0; }
+
+  /* ---- input rows ---- */
+  .input-row { display: grid; grid-template-columns: 32px 1fr 96px; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .input-row:last-child { margin-bottom: 0; }
+  .op-name { font-weight: 600; font-size: 16px; color: var(--accent); text-align: center; }
+  .op-name.b { color: var(--warn); }
+  .field-wrap { position: relative; }
+  input[type=text] {
+    width: 100%; background: var(--bg); border: 1px solid var(--line-bright);
+    border-radius: 6px; color: #fff; font-family: var(--mono); font-size: 16px;
+    padding: 10px 12px; letter-spacing: 1px;
+  }
+  input[type=text]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(89,194,184,0.12); }
+  input[type=text].err { border-color: var(--bad); }
+  .base-pick { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+  .base-pick button {
+    background: var(--panel-2); color: var(--ink-faint); border: none; border-right: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; padding: 9px 0; width: 32px; cursor: pointer; transition: all .12s;
+  }
+  .base-pick button:last-child { border-right: none; }
+  .base-pick button.active { background: var(--warn); color: #2a1c08; font-weight: 600; }
+  .base-pick button:hover:not(.active) { color: var(--ink); }
+  .err-msg { color: var(--bad); font-size: 11px; margin-top: 4px; min-height: 14px; }
+
+  .op-select { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+  .op-select button {
+    background: var(--panel-2); border: 1px solid var(--line-bright); border-radius: 6px;
+    color: var(--ink-dim); font-family: var(--mono); font-size: 13px; padding: 8px 14px; cursor: pointer;
+    transition: all .12s;
+  }
+  .op-select button:hover { color: var(--ink); border-color: var(--accent); }
+  .op-select button.active { background: var(--accent); color: #06201d; border-color: var(--accent); font-weight: 600; }
+  .op-select .unary { opacity: 0.92; }
+  .op-select .sep { width: 1px; background: var(--line); margin: 2px 4px; }
+
+  /* ---- inspect line above grid ---- */
+  .inspect {
+    border-left: 3px solid var(--accent); padding: 7px 0 7px 13px; margin-bottom: 16px;
+    font-size: 15px; color: var(--ink); min-height: 34px; line-height: 1.4;
+  }
+  .inspect .lead { color: var(--accent); font-weight: 600; text-shadow: 0 0 7px rgba(89,194,184,0.5); }
+  .inspect .one { color: var(--warn); font-weight: 600; }
+  .inspect .zero { color: var(--ink-dim); }
+  .inspect .opc { color: var(--warn); }
+  .inspect .dim { color: var(--ink-dim); }
+
+  /* ---- bit grid ---- */
+  .bitgrid-scroll { overflow-x: auto; padding-bottom: 6px; display: flex; justify-content: flex-start; }
+  .bitgrid { border-collapse: separate; border-spacing: 4px; font-size: 18px; }
+  .bitgrid th, .bitgrid td { padding: 0; text-align: center; }
+  .bitgrid .rowlabel {
+    text-align: right; padding-right: 8px; color: var(--ink-dim); font-size: 16px;
+    white-space: nowrap; min-width: 30px; font-weight: 600;
+  }
+  .bitgrid .rowlabel .opsym { color: var(--warn); text-shadow: 0 0 6px rgba(227,168,87,0.5); }
+  .bitgrid .rowlabel .nm { color: var(--ink); }
+  .bitgrid .rowlabel .val { color: var(--ink); }
+  .bit {
+    width: 42px; height: 42px; line-height: 40px; font-weight: 600;
+    border: 1.5px solid var(--line-bright); border-radius: 9px; position: relative;
+    transition: box-shadow .12s, border-color .12s, background .12s; cursor: default;
+  }
+  .bit.one { color: var(--warn); border-color: rgba(227,168,87,0.55); background: rgba(227,168,87,0.12); text-shadow: 0 0 8px rgba(227,168,87,0.5); }
+  .bit.zero { color: var(--ink-faint); background: var(--bg); }
+  .bit.result-one { color: #1a1205; background: var(--warn); border-color: var(--warn); box-shadow: 0 0 12px rgba(227,168,87,0.35); }
+  .bit.result-zero { color: var(--ink-faint); background: var(--bg); border-color: var(--line-bright); }
+  .bit.carry { color: var(--warn); border-color: rgba(227,168,87,0.5); background: rgba(227,168,87,0.10); }
+  /* column hover highlight */
+  .bitgrid td.col-hot .bit { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 14px rgba(89,194,184,0.4); }
+  .bitgrid td.col-hot .bit.result-one { box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(89,194,184,0.55); }
+  .colhead { color: var(--ink-faint); font-size: 12px; padding-top: 3px; height: 20px; transition: color .12s; }
+  .colhead.col-hot { color: var(--accent); text-shadow: 0 0 7px rgba(89,194,184,0.6); }
+  .diffrow td { font-size: 14px; height: 20px; }
+  .diffrow .match { color: var(--good); }
+  .diffrow .diff { color: var(--warn); }
+  .gridsep td { height: 6px; }
+  .gridsep .ruleline { border-top: 1.5px solid var(--line-bright); }
+  .gridsep .ruleline.lbl { border-top: none; }
+
+  /* ---- result display ---- */
+  .results { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .result-card { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 11px 13px; }
+  .result-card .rc-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-faint); margin-bottom: 3px; }
+  .result-card .rc-val { font-size: 17px; color: #fff; word-break: break-all; }
+  .result-card .rc-val .pre { color: var(--ink-faint); }
+
+  /* ---- per-bit explainer ---- */
+  .explain { font-size: 13px; line-height: 1.7; color: var(--ink-dim); }
+  .explain .col-ref { color: var(--warn); font-weight: 600; }
+  .explain b { color: var(--ink); font-weight: 600; }
+  .explain .one { color: var(--accent); }
+  .explain .zero { color: var(--zero); }
+  .colgroups { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+  .colgroup { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 11px 13px; }
+  .cg-label { font-size: 12px; color: var(--ink-dim); margin-bottom: 9px; }
+  .cg-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .bitchip {
+    display: inline-flex; align-items: center; background: var(--panel-2);
+    border: 1px solid var(--line-bright); border-radius: 5px; padding: 4px 9px;
+    font-size: 13px; color: var(--ink); white-space: nowrap;
+  }
+  .bitchip .sep { color: var(--ink-faint); margin: 0 5px; }
+  .bitchip .op { color: var(--warn); margin: 0 4px; }
+  .bitchip .arrow { color: var(--ink-faint); margin: 0 6px; }
+  .truth-head { margin-top: 16px; margin-bottom: 8px; font-size: 12px; color: var(--ink-dim); }
+  .truth { border-collapse: collapse; font-size: 13px; }
+  .truth th, .truth td { border: 1px solid var(--line); padding: 6px 13px; text-align: center; color: var(--ink-dim); }
+  .truth th { color: var(--ink-faint); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .truth td.opc { color: var(--warn); border-left: none; border-right: none; padding: 6px 4px; }
+  .truth td.out-1 { color: var(--warn); font-weight: 600; }
+  .truth td.out-0 { color: var(--zero); }
+  .truth .cnt { color: var(--accent); font-weight: 600; }
+  .truth .cnt.none { color: var(--ink-faint); font-weight: 400; }
+  .truth tr.active-row td { background: rgba(89,194,184,0.10); }
+  .truth tr.active-row td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+  /* ---- MBA panel ---- */
+  .mba-intro { color: var(--ink-dim); font-size: 13px; margin-bottom: 14px; }
+  .identity { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 13px 15px; margin-bottom: 10px; }
+  .identity:last-child { margin-bottom: 0; }
+  .id-formula { font-size: 15px; color: var(--ink); margin-bottom: 9px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .id-formula .lhs { color: var(--accent); font-weight: 600; }
+  .id-formula .eq { color: var(--ink-faint); }
+  .id-formula .rhs { color: var(--ink); }
+  .id-check { font-size: 12px; padding: 3px 9px; border-radius: 4px; font-weight: 600; white-space: nowrap; }
+  .id-check.ok { background: rgba(124,184,124,0.15); color: var(--good); }
+  .id-check.no { background: rgba(210,112,107,0.15); color: var(--bad); }
+  .id-steps { font-size: 13px; color: var(--ink-dim); display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline; }
+  .id-steps .lbl { color: var(--ink-faint); text-align: right; }
+  .id-steps .num { color: var(--ink); }
+  .id-note { font-size: 12px; color: var(--ink-faint); margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); }
+  .wrapnote { color: var(--warn); }
+  .id-check .wrapnote { font-weight: 400; opacity: 0.95; }
+  .wrapnote sup { font-size: 0.7em; }
+
+  /* ---- identity body: algebra | assembly side by side ---- */
+  .id-body { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 16px; align-items: start; }
+  .id-col-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-faint); margin-bottom: 7px; }
+  .id-col-label.clean { color: var(--good); }
+  .id-col-label.obf { color: var(--warn); }
+  .id-asm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .id-asm-col { min-width: 0; }
+  .asm { font-size: 13px; line-height: 1.7; overflow-x: auto; }
+  .asm.sm { font-size: 12px; line-height: 1.65; background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 9px 11px; }
+  .asm .ln { display: block; white-space: pre; }
+  .asm .mn { color: var(--accent); }
+  .asm .rg { color: var(--ink); }
+  .asm .im { color: var(--warn); }
+  .asm .cm { color: var(--ink-faint); }
+  .asm .obfm { color: var(--warn); }
+  @media (max-width: 680px){
+    .id-body { grid-template-columns: 1fr; gap: 12px; }
+    .id-asm-pair { grid-template-columns: 1fr; }
+  }
+
+  footer { text-align: center; color: var(--ink-faint); font-size: 11px; margin-top: 24px; line-height: 1.7; }
+
+  .hint { color: var(--ink-faint); font-size: 12px; margin-top: 10px; }
+  ::-webkit-scrollbar { height: 9px; width: 9px; }
+  ::-webkit-scrollbar-track { background: var(--panel); }
+  ::-webkit-scrollbar-thumb { background: var(--line-bright); border-radius: 5px; }
+
+  @media (max-width: 560px) {
+    .input-row { grid-template-columns: 28px 1fr; }
+    .input-row .base-pick { grid-column: 2; justify-self: start; }
+    .bit { width: 30px; height: 30px; line-height: 30px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+  <!-- Back-to-site bar — keeps standalone tools connected to the main site -->
+<div style="position:sticky; top:0; z-index:999; background:#0a0e14; border-bottom:1px solid #1a2332; padding:0.6rem 1.25rem; font-family:'JetBrains Mono','Fira Code',monospace; font-size:0.82rem;">
+  <a href="https://mattswann.dev/" style="color:#3ddbd9; text-decoration:none; letter-spacing:0.04em;">← mattswann.dev</a>
+  <span style="color:#3a4556; margin:0 0.6rem;">/</span>
+  <a href="https://mattswann.dev/tools/" style="color:#8b98a8; text-decoration:none;">tools</a>
+</div>
+<div class="wrap">
+  <header>
+    <div class="title">bitwise lab<span class="blink">_</span></div>
+    <div class="subtitle">boolean operations &amp; mixed boolean-arithmetic, bit by bit</div>
+  </header>
+
+  <!-- WIDTH + INPUTS -->
+  <div class="panel">
+    <div class="panel-label">inputs</div>
+    <div class="controls" style="margin-bottom:18px;">
+      <div class="ctrl-group">
+        <label>bit width</label>
+        <div class="seg" id="widthSeg">
+          <button data-w="4">4</button>
+          <button data-w="8" class="active">8</button>
+          <button data-w="16">16</button>
+          <button data-w="32">32</button>
+          <button data-w="64">64</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="op-name">A</div>
+      <div class="field-wrap">
+        <input type="text" id="inA" value="1100" spellcheck="false" autocomplete="off">
+        <div class="err-msg" id="errA"></div>
+      </div>
+      <div class="base-pick" data-target="A">
+        <button data-base="2" class="active">BIN</button>
+        <button data-base="10">DEC</button>
+        <button data-base="16">HEX</button>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="op-name b">B</div>
+      <div class="field-wrap">
+        <input type="text" id="inB" value="1010" spellcheck="false" autocomplete="off">
+        <div class="err-msg" id="errB"></div>
+      </div>
+      <div class="base-pick" data-target="B">
+        <button data-base="2" class="active">BIN</button>
+        <button data-base="10">DEC</button>
+        <button data-base="16">HEX</button>
+      </div>
+    </div>
+
+    <div class="ctrl-group" style="margin-top:6px;">
+      <label>operation</label>
+      <div class="op-select" id="opSelect">
+        <button data-op="AND">AND &amp;</button>
+        <button data-op="OR">OR |</button>
+        <button data-op="XOR" class="active">XOR ^</button>
+        <button data-op="NOT_A" class="unary">NOT A ~</button>
+        <button data-op="NOT_B" class="unary">NOT B ~</button>
+        <div class="sep"></div>
+        <button data-op="SHL">A &lt;&lt; 1</button>
+        <button data-op="SHR">A &gt;&gt; 1</button>
+        <div class="sep"></div>
+        <button data-op="ADD">ADD +</button>
+        <button data-op="SUB">SUB −</button>
+      </div>
+      <div class="hint" id="opHint">XOR — output bit is 1 where the inputs differ.</div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="panel">
+    <div class="panel-label">result</div>
+    <div class="results" id="results"></div>
+  </div>
+
+  <!-- BIT GRID -->
+  <div class="panel">
+    <div class="panel-label">bit-by-bit</div>
+    <div class="inspect" id="inspect">Hover a column to inspect a single bit.</div>
+    <div class="bitgrid-scroll">
+      <table class="bitgrid" id="bitgrid"></table>
+    </div>
+  </div>
+
+  <!-- EXPLAIN + TRUTH TABLE -->
+  <div class="panel">
+    <div class="panel-label">what happened</div>
+    <div class="explain" id="explain"></div>
+    <div id="truthWrap"></div>
+  </div>
+
+  <!-- MBA -->
+  <div class="panel">
+    <div class="panel-label">arithmetic shadow</div>
+    <div class="mba-intro">
+      Every operation casts an arithmetic shadow: a simple value rewritten as a tangle of boolean and arithmetic ops that computes the same thing. Each identity is shown three ways: the worked numbers (verified live against your A and B), and the representative x86-64 it compiles to: <b style="color:var(--ink)">clean</b> versus <b style="color:var(--ink)">obfuscated</b>. The assembly is illustrative Intel syntax, not any specific toolchain; real samples pile junk and padding on top. The skill is reading past the expansion to the simple operation underneath.
+    </div>
+    <div id="mbaPanel"></div>
+  </div>
+
+  <footer>
+    bitwise lab · all math runs locally with BigInt at the selected width · nothing leaves your browser
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const state = {
+    width: 8,
+    baseA: 2,
+    baseB: 2,
+    op: 'XOR',
+  };
+
+  const ops = {
+    AND:   { sym:'&', unary:false, hint:'AND — output bit is 1 only where BOTH inputs are 1. Used for masking (keeping bits).' },
+    OR:    { sym:'|', unary:false, hint:'OR — output bit is 1 where EITHER input is 1. Used for setting bits on.' },
+    XOR:   { sym:'^', unary:false, hint:'XOR — output bit is 1 where the inputs DIFFER. This is "add without carry".' },
+    NOT_A: { sym:'~', unary:true,  hint:'NOT A — flips every bit of A. In two\u2019s complement, ~A equals \u2212A \u2212 1.' },
+    NOT_B: { sym:'~', unary:true,  hint:'NOT B — flips every bit of B. In two\u2019s complement, ~B equals \u2212B \u2212 1.' },
+    SHL:   { sym:'<<',unary:true,  hint:'A << 1 — shifts every bit one place left, filling 0 on the right. Multiplies by 2.' },
+    SHR:   { sym:'>>',unary:true,  hint:'A >> 1 — shifts every bit one place right, dropping the low bit. Integer divide by 2.' },
+    ADD:   { sym:'+', unary:false, hint:'ADD — ordinary addition. Watch how the carry chain (amber) propagates leftward.' },
+    SUB:   { sym:'\u2212', unary:false, hint:'SUB — A minus B, computed at this width with wraparound (two\u2019s complement).' },
+  };
+
+  function mask(w){ return (1n << BigInt(w)) - 1n; }
+
+  // ---- parsing ----
+  function parseInput(raw, base, w){
+    let s = raw.trim().toLowerCase().replace(/\s+/g,'');
+    if (s === '') return { err: 'empty' };
+    let neg = false;
+    if (s[0] === '-'){ neg = true; s = s.slice(1); }
+    if (base === 16 && s.startsWith('0x')) s = s.slice(2);
+    if (base === 2  && s.startsWith('0b')) s = s.slice(2);
+    const pat = base === 2 ? /^[01]+$/ : base === 10 ? /^[0-9]+$/ : /^[0-9a-f]+$/;
+    if (!pat.test(s)) return { err: 'bad' };
+    let v;
+    try { v = BigInt(base === 16 ? '0x'+s : base === 2 ? '0b'+s : s); }
+    catch(e){ return { err: 'bad' }; }
+    if (neg) v = -v;
+    const m = mask(w);
+    // wrap into width (two's complement for negatives)
+    v = ((v % (m+1n)) + (m+1n)) % (m+1n);
+    return { val: v };
+  }
+
+  function toBits(v, w){
+    const m = mask(w);
+    v = v & m;
+    let s = v.toString(2);
+    while (s.length < w) s = '0' + s;
+    return s.slice(-w);
+  }
+
+  function fmt(v, base, w){
+    const m = mask(w);
+    v = v & m;
+    if (base === 2) return toBits(v, w);
+    if (base === 10) return v.toString(10);
+    let h = v.toString(16).toUpperCase();
+    return h;
+  }
+
+  // ---- compute op ----
+  function compute(a, b, op, w){
+    const m = mask(w);
+    let r;
+    switch(op){
+      case 'AND': r = a & b; break;
+      case 'OR':  r = a | b; break;
+      case 'XOR': r = a ^ b; break;
+      case 'NOT_A': r = (~a) & m; break;
+      case 'NOT_B': r = (~b) & m; break;
+      case 'SHL': r = (a << 1n) & m; break;
+      case 'SHR': r = (a >> 1n) & m; break;
+      case 'ADD': r = (a + b) & m; break;
+      case 'SUB': r = (a - b) & m; break;
+    }
+    return r & m;
+  }
+
+  // ---- DOM refs ----
+  const $ = id => document.getElementById(id);
+  const inA = $('inA'), inB = $('inB');
+
+  // ---- render bit grid ----
+  function renderGrid(a, b, r, op, w){
+    const grid = $('bitgrid');
+    const def = ops[op];
+    const bitsA = toBits(a, w), bitsB = toBits(b, w), bitsR = toBits(r, w);
+    let carries = null;
+    if (op === 'ADD' || op === 'SUB') carries = computeCarryBits(a, b, op, w);
+
+    // label for the operator that sits beside the second operand
+    const opLabel = { AND:'&', OR:'|', XOR:'^', ADD:'+', SUB:'\u2212' }[op] || '';
+
+    // stash context the inspect line will read on hover
+    gridCtx = { a, b, r, op, w, bitsA, bitsB, bitsR, carries };
+
+    let html = '';
+
+    // compact column-index header (each cell tagged with its display column index)
+    html += '<tr><td class="rowlabel"></td>';
+    for (let i = 0; i < w; i++){
+      const bitpos = w - 1 - i;
+      html += `<th class="colhead" data-col="${i}">${bitpos}</th>`;
+    }
+    html += '</tr>';
+
+    // carry row (only for add/sub)
+    if (carries){
+      html += `<tr><td class="rowlabel"><span class="nm">${op==='ADD'?'carry':'borrow'}</span></td>`;
+      for (let i = 0; i < w; i++){
+        const c = carries[i];
+        html += `<td data-col="${i}"><div class="bit ${c==='1'?'carry':'zero'}">${c==='1'?'1':'\u00b7'}</div></td>`;
+      }
+      html += '</tr>';
+    }
+
+    // operand rows
+    if (op === 'NOT_A'){
+      html += rowFor('~', 'A', bitsA);
+    } else if (op === 'NOT_B'){
+      html += rowFor('~', 'B', bitsB);
+    } else if (op === 'SHL' || op === 'SHR'){
+      html += rowFor('', 'A', bitsA);
+    } else {
+      // binary: A on top, operator inline with B
+      html += rowFor('', 'A', bitsA);
+      html += rowFor(opLabel, 'B', bitsB);
+    }
+
+    // diff/match row for boolean ops
+    if (op === 'XOR' || op === 'AND' || op === 'OR'){
+      html += '<tr class="diffrow"><td class="rowlabel"></td>';
+      for (let i = 0; i < w; i++){
+        const same = bitsA[i] === bitsB[i];
+        html += `<td data-col="${i}">${same ? '<span class="match">=</span>' : '<span class="diff">\u2260</span>'}</td>`;
+      }
+      html += '</tr>';
+    }
+
+    // rule line
+    html += '<tr class="gridsep"><td class="ruleline lbl"></td>';
+    for (let i = 0; i < w; i++) html += '<td class="ruleline"></td>';
+    html += '</tr>';
+
+    // result row
+    html += '<tr><td class="rowlabel"><span class="val">=</span></td>';
+    for (let i = 0; i < w; i++){
+      const bit = bitsR[i];
+      html += `<td data-col="${i}"><div class="bit ${bit==='1'?'result-one':'result-zero'}">${bit}</div></td>`;
+    }
+    html += '</tr>';
+
+    grid.innerHTML = html;
+
+    // opsym = operator glyph (amber), nm = operand name
+    function rowFor(opsym, name, bits){
+      const lbl = (opsym ? `<span class="opsym">${opsym}</span>` : '') + `<span class="nm">${name}</span>`;
+      let h = `<tr><td class="rowlabel">${lbl}</td>`;
+      for (let i = 0; i < bits.length; i++){
+        const bit = bits[i];
+        h += `<td data-col="${i}"><div class="bit ${bit==='1'?'one':'zero'}">${bit}</div></td>`;
+      }
+      h += '</tr>';
+      return h;
+    }
+  }
+
+  // ---- column hover: light the column + update inspect line ----
+  let gridCtx = null;
+
+  function highlightCol(col){
+    const grid = $('bitgrid');
+    grid.querySelectorAll('td.col-hot, th.col-hot').forEach(el => el.classList.remove('col-hot'));
+    if (col == null) return;
+    grid.querySelectorAll(`[data-col="${col}"]`).forEach(el => el.classList.add('col-hot'));
+  }
+
+  function inspectText(col){
+    if (!gridCtx) return 'Hover a column to inspect a single bit.';
+    const { op, w, bitsA, bitsB, bitsR, carries } = gridCtx;
+    if (col == null) return 'Hover a column to inspect a single bit.';
+    const pos = w - 1 - col;
+    const ai = bitsA[col], bi = bitsB[col], ri = bitsR[col];
+    const lead = `<span class="lead">bit ${pos}</span>`;
+    const sym = { XOR:'^', AND:'&', OR:'|', ADD:'+', SUB:'\u2212' }[op];
+    const cls = v => v === '1' ? 'one' : 'zero';
+    const span = v => `<span class="${cls(v)}">${v}</span>`;
+
+    if (op === 'XOR'){
+      const same = ai === bi;
+      return `${lead}: A=${span(ai)} <span class="opc">^</span> B=${span(bi)} = ${span(ri)} <span class="dim">\u2014 the bits ${same?'match':'differ'}.</span>`;
+    }
+    if (op === 'AND'){
+      return `${lead}: A=${span(ai)} <span class="opc">&</span> B=${span(bi)} = ${span(ri)} <span class="dim">\u2014 ${ri==='1'?'both bits are 1':'not both 1'}.</span>`;
+    }
+    if (op === 'OR'){
+      return `${lead}: A=${span(ai)} <span class="opc">|</span> B=${span(bi)} = ${span(ri)} <span class="dim">\u2014 ${ri==='1'?'at least one bit is 1':'both bits are 0'}.</span>`;
+    }
+    if (op === 'NOT_A'){
+      return `${lead}: ~A = ~${span(ai)} = ${span(ri)} <span class="dim">\u2014 the bit flips.</span>`;
+    }
+    if (op === 'NOT_B'){
+      return `${lead}: ~B = ~${span(bi)} = ${span(ri)} <span class="dim">\u2014 the bit flips.</span>`;
+    }
+    if (op === 'SHL'){
+      return `${lead}: A=${span(ai)} \u2192 result ${span(ri)} <span class="dim">\u2014 every bit slid one place left.</span>`;
+    }
+    if (op === 'SHR'){
+      return `${lead}: A=${span(ai)} \u2192 result ${span(ri)} <span class="dim">\u2014 every bit slid one place right.</span>`;
+    }
+    if (op === 'ADD' || op === 'SUB'){
+      const c = carries ? carries[col] : '0';
+      const cw = op === 'ADD' ? 'carry-in' : 'borrow-in';
+      return `${lead}: A=${span(ai)} <span class="opc">${sym}</span> B=${span(bi)} with ${cw}=${span(c)} = ${span(ri)}`;
+    }
+    return `${lead}: result ${span(ri)}`;
+  }
+
+  // carry bits for visual add/sub (per displayed column, MSB-left)
+  function computeCarryBits(a, b, op, w){
+    const bitsA = toBits(a, w), bitsB = toBits(b, w);
+    const carry = new Array(w).fill('0'); // indexed same as display (0 = MSB)
+    let c = 0;
+    // process LSB -> MSB ; display index w-1 is LSB
+    const cIntoColumn = new Array(w).fill(0);
+    for (let pos = w - 1; pos >= 0; pos--){
+      const x = bitsA[pos] === '1' ? 1 : 0;
+      let y = bitsB[pos] === '1' ? 1 : 0;
+      cIntoColumn[pos] = c;
+      if (op === 'ADD'){
+        const sum = x + y + c;
+        c = sum >= 2 ? 1 : 0;
+      } else { // SUB via borrow
+        let diff = x - y - c;
+        c = diff < 0 ? 1 : 0;
+      }
+    }
+    // carry INTO a column is what we visualize above that column
+    for (let pos = 0; pos < w; pos++){
+      carry[pos] = cIntoColumn[pos] ? '1' : '0';
+    }
+    return carry;
+  }
+
+  // ---- render results ----
+  function renderResults(r, w){
+    const el = $('results');
+    el.innerHTML = `
+      <div class="result-card"><div class="rc-label">binary</div><div class="rc-val">${groupBits(toBits(r,w))}</div></div>
+      <div class="result-card"><div class="rc-label">decimal (unsigned)</div><div class="rc-val">${r.toString(10)}</div></div>
+      <div class="result-card"><div class="rc-label">decimal (signed)</div><div class="rc-val">${signedDec(r,w)}</div></div>
+      <div class="result-card"><div class="rc-label">hexadecimal</div><div class="rc-val"><span class="pre">0x</span>${r.toString(16).toUpperCase()}</div></div>
+    `;
+  }
+  function groupBits(s){
+    // group into nibbles for readability
+    let out = '';
+    for (let i = 0; i < s.length; i++){
+      if (i > 0 && (s.length - i) % 4 === 0) out += ' ';
+      out += s[i];
+    }
+    return out;
+  }
+  function signedDec(v, w){
+    const m = mask(w);
+    v = v & m;
+    const signbit = 1n << BigInt(w-1);
+    if (v & signbit) return (v - (m+1n)).toString(10);
+    return v.toString(10);
+  }
+
+  // ---- render explanation + truth table ----
+  function renderExplain(a, b, op, w){
+    const exp = $('explain'), tw = $('truthWrap');
+    const def = ops[op];
+    const bitsA = toBits(a, w), bitsB = toBits(b, w), bitsR = toBits(compute(a,b,op,w), w);
+
+    let text = '';
+    if (op === 'XOR' || op === 'AND' || op === 'OR'){
+      // collect ALL differing columns and ALL matching columns
+      const diffCols = [], matchCols = [];
+      for (let i = 0; i < w; i++){
+        const pos = w-1-i;
+        const entry = { pos, ai: bitsA[i], bi: bitsB[i], ri: bitsR[i] };
+        if (bitsA[i] === bitsB[i]) matchCols.push(entry); else diffCols.push(entry);
+      }
+      const rule = {
+        XOR: 'each output bit is <span class="one">1</span> exactly where the two input bits <b>differ</b>, and <span class="zero">0</span> where they <b>match</b>',
+        AND: 'each output bit is <span class="one">1</span> only where <b>both</b> inputs are <span class="one">1</span>',
+        OR:  'each output bit is <span class="one">1</span> wherever <b>either</b> input is <span class="one">1</span>',
+      }[op];
+      text += `For <b>${op}</b>, ${rule}. Every column read independently:`;
+
+      const chip = e => `<span class="bitchip">b${e.pos}<span class="sep">·</span>${e.ai}<span class="op">${op==='XOR'?'^':op==='AND'?'&':'|'}</span>${e.bi}<span class="arrow">\u2192</span><span class="${e.ri==='1'?'one':'zero'}">${e.ri}</span></span>`;
+
+      const groups = [];
+      if (op === 'XOR'){
+        if (diffCols.length)  groups.push(['Differing columns \u2192 <span class="one">1</span>', diffCols]);
+        if (matchCols.length) groups.push(['Matching columns \u2192 <span class="zero">0</span>', matchCols]);
+      } else if (op === 'AND'){
+        const ones = matchCols.concat(diffCols).filter(e=>e.ri==='1').sort((a,b)=>b.pos-a.pos);
+        const zeros = matchCols.concat(diffCols).filter(e=>e.ri==='0').sort((a,b)=>b.pos-a.pos);
+        if (ones.length)  groups.push(['Both bits <span class="one">1</span> \u2192 <span class="one">1</span>', ones]);
+        if (zeros.length) groups.push(['At least one bit <span class="zero">0</span> \u2192 <span class="zero">0</span>', zeros]);
+      } else { // OR
+        const ones = matchCols.concat(diffCols).filter(e=>e.ri==='1').sort((a,b)=>b.pos-a.pos);
+        const zeros = matchCols.concat(diffCols).filter(e=>e.ri==='0').sort((a,b)=>b.pos-a.pos);
+        if (ones.length)  groups.push(['At least one bit <span class="one">1</span> \u2192 <span class="one">1</span>', ones]);
+        if (zeros.length) groups.push(['Both bits <span class="zero">0</span> \u2192 <span class="zero">0</span>', zeros]);
+      }
+
+      text += '<div class="colgroups">';
+      groups.forEach(([label, cols]) => {
+        text += `<div class="colgroup"><div class="cg-label">${label}</div><div class="cg-chips">${cols.map(chip).join('')}</div></div>`;
+      });
+      text += '</div>';
+    } else if (op === 'NOT_A' || op === 'NOT_B'){
+      const which = op === 'NOT_A' ? 'A' : 'B';
+      const src = op === 'NOT_A' ? bitsA : bitsB;
+      const val = op === 'NOT_A' ? a : b;
+      text += `<b>NOT ${which}</b> flips every bit of ${which}: each <span class="one">1</span> becomes <span class="zero">0</span> and each <span class="zero">0</span> becomes <span class="one">1</span>.`;
+      text += `<div style="margin-top:8px">In two\u2019s complement at ${w} bits, <b>~${which} = \u2212${which} \u2212 1</b>. Here ${which}=${val.toString(10)}, so ~${which} = \u2212${val.toString(10)} \u2212 1 = ${signedDec(compute(a,b,op,w),w)} (signed) / ${compute(a,b,op,w).toString(10)} (unsigned).</div>`;
+    } else if (op === 'SHL'){
+      text += `<b>A &lt;&lt; 1</b> moves every bit one position to the left; the leftmost bit falls off the ${w}-bit edge and a <span class="zero">0</span> enters on the right. This multiplies by 2 (mod 2<sup>${w}</sup>).`;
+      text += `<div style="margin-top:8px">${a.toString(10)} \u00d7 2 = ${(a*2n).toString(10)}, which at ${w} bits is <b>${compute(a,b,op,w).toString(10)}</b>.</div>`;
+    } else if (op === 'SHR'){
+      text += `<b>A &gt;&gt; 1</b> moves every bit one position to the right; the rightmost bit falls off and a <span class="zero">0</span> enters on the left. This is integer division by 2.`;
+      text += `<div style="margin-top:8px">\u230A${a.toString(10)} \u00f7 2\u230B = <b>${compute(a,b,op,w).toString(10)}</b>.</div>`;
+    } else if (op === 'ADD'){
+      text += `<b>ADD</b> works column by column from the right, like grade-school addition in base 2. Each column sums A\u2019s bit, B\u2019s bit, and any <span style="color:var(--warn)">carry</span> coming in. When the column total reaches 2, it emits a carry into the next column left.`;
+      text += `<div style="margin-top:8px">This is the operation MBA hides. Notice: <b>A ^ B</b> gives the sum bits <i>ignoring</i> carries, and <b>(A &amp; B) &lt;&lt; 1</b> gives exactly those carries. Add them back and you recover A + B — see the identity panel.</div>`;
+    } else if (op === 'SUB'){
+      text += `<b>SUB</b> computes A \u2212 B column by column using <span style="color:var(--warn)">borrows</span> instead of carries. At a fixed width, subtraction is really A + (\u2212B), and \u2212B is formed as ~B + 1 (two\u2019s complement).`;
+      text += `<div style="margin-top:8px">A=${a.toString(10)}, B=${b.toString(10)} → A \u2212 B = ${signedDec(compute(a,b,op,w),w)} (signed) / ${compute(a,b,op,w).toString(10)} (unsigned, wrapped).</div>`;
+    }
+    exp.innerHTML = text;
+
+    // truth table for binary boolean ops
+    if (op === 'AND' || op === 'OR' || op === 'XOR'){
+      const f = { AND:(x,y)=>x&y, OR:(x,y)=>x|y, XOR:(x,y)=>x^y }[op];
+      const sym = { AND:'&', OR:'|', XOR:'^' }[op];
+      // count how many bit-columns land on each (A,B) pairing
+      const count = { '00':0, '01':0, '10':0, '11':0 };
+      for (let i = 0; i < w; i++) count[bitsA[i]+bitsB[i]]++;
+      let t = `<div class="truth-head">Truth table \u2014 every way one bit of A and one bit of B can pair, and what ${op} gives</div>`;
+      t += `<table class="truth"><tr><th>A bit</th><th>${sym}</th><th>B bit</th><th>${op}</th><th>columns like this</th></tr>`;
+      [['0','0'],['0','1'],['1','0'],['1','1']].forEach(([x,y])=>{
+        const o = f(+x,+y);
+        const n = count[x+y];
+        const active = n > 0 ? ' class="active-row"' : '';
+        const countCell = n > 0
+          ? `<span class="cnt">${n} \u00d7</span>`
+          : `<span class="cnt none">none</span>`;
+        t += `<tr${active}><td>${x}</td><td class="opc">${sym}</td><td>${y}</td><td class="out-${o}">${o}</td><td>${countCell}</td></tr>`;
+      });
+      t += '</table>';
+      t += '<div class="hint">The last column counts how many of your ' + w + ' bit-positions fall into each row. Highlighted rows are the pairings that actually occur in A and B right now \u2014 change A or B and watch which rows light up.</div>';
+      tw.innerHTML = t;
+    } else {
+      tw.innerHTML = '';
+    }
+  }
+
+  // ---- MBA identities ----
+  function renderMBA(a, b, w){
+    const m = mask(w);
+    const AND = a & b, OR = a | b, XOR = a ^ b, NA = (~a)&m, NB = (~b)&m;
+    const SHL = x => (x << 1n) & m;
+    const SHLraw = x => x << 1n;          // un-masked, to expose overflow
+    const wrap = v => ((v % (m+1n)) + (m+1n)) % (m+1n);
+
+    const ids = [
+      {
+        lhs: 'A + B', rhs: '(A ^ B) + 2\u00b7(A &amp; B)',
+        lval: (a+b)&m,
+        rval: (XOR + SHL(AND)) & m,
+        trueVal: a + b,                    // real arithmetic sum, may exceed width
+        steps: [
+          ['A ^ B', XOR],
+          ['A &amp; B', AND],
+          ['2\u00b7(A &amp; B)', SHL(AND)],
+          ['sum', (XOR + SHL(AND)) & m, XOR + SHLraw(AND)],
+        ],
+        note: 'The foundational identity: XOR gives the carry-less sum, the AND (shifted left) restores the carries.',
+        asmClean: [{mn:'add', ops:['rax','rcx'], cm:'rax = A + B'}],
+        asmObf: [
+          {mn:'mov', ops:['rdx','rax']},
+          {mn:'xor', ops:['rdx','rcx'], obf:true, cm:'A ^ B  (sum w/o carry)'},
+          {mn:'and', ops:['rax','rcx'], obf:true, cm:'A & B  (the carries)'},
+          {mn:'shl', ops:['rax',{im:'1'}], obf:true, cm:'2*(A & B)'},
+          {mn:'add', ops:['rax','rdx'], cm:'= A + B'},
+        ],
+      },
+      {
+        lhs: 'A + B', rhs: '(A | B) + (A &amp; B)',
+        lval: (a+b)&m,
+        rval: (OR + AND) & m,
+        trueVal: a + b,
+        steps: [
+          ['A | B', OR],
+          ['A &amp; B', AND],
+          ['sum', (OR + AND) & m, OR + AND],
+        ],
+        note: 'OR counts every set bit once; AND adds back the bits that were set in both.',
+        asmClean: [{mn:'add', ops:['rax','rcx'], cm:'rax = A + B'}],
+        asmObf: [
+          {mn:'mov', ops:['rdx','rax']},
+          {mn:'or',  ops:['rdx','rcx'], obf:true, cm:'A | B'},
+          {mn:'and', ops:['rax','rcx'], obf:true, cm:'A & B'},
+          {mn:'add', ops:['rax','rdx'], cm:'= A + B'},
+        ],
+      },
+      {
+        lhs: 'A | B', rhs: '(A ^ B) + (A &amp; B)',
+        lval: OR,
+        rval: (XOR + AND) & m,
+        trueVal: OR,
+        steps: [
+          ['A ^ B', XOR],
+          ['A &amp; B', AND],
+          ['sum', (XOR + AND) & m, XOR + AND],
+        ],
+        note: 'Differing bits plus shared bits = every bit that is set in either operand.',
+        asmClean: [{mn:'or', ops:['rax','rcx'], cm:'rax = A | B'}],
+        asmObf: [
+          {mn:'mov', ops:['rdx','rax']},
+          {mn:'xor', ops:['rdx','rcx'], obf:true, cm:'A ^ B'},
+          {mn:'and', ops:['rax','rcx'], obf:true, cm:'A & B'},
+          {mn:'add', ops:['rax','rdx'], cm:'= A | B'},
+        ],
+      },
+      {
+        lhs: 'A ^ B', rhs: '(A | B) \u2212 (A &amp; B)',
+        lval: XOR,
+        rval: (OR - AND) & m,
+        trueVal: XOR,
+        steps: [
+          ['A | B', OR],
+          ['A &amp; B', AND],
+          ['difference', (OR - AND) & m],
+        ],
+        note: 'All set bits, minus the ones counted twice, leaves only the bits that differ.',
+        asmClean: [{mn:'xor', ops:['rax','rcx'], cm:'rax = A ^ B'}],
+        asmObf: [
+          {mn:'mov', ops:['rdx','rax']},
+          {mn:'or',  ops:['rdx','rcx'], obf:true, cm:'A | B'},
+          {mn:'and', ops:['rax','rcx'], obf:true, cm:'A & B'},
+          {mn:'sub', ops:['rdx','rax'], obf:true, cm:'(A|B) - (A&B)'},
+          {mn:'mov', ops:['rax','rdx'], cm:'= A ^ B'},
+        ],
+      },
+      {
+        lhs: 'A \u2212 B', rhs: '(A ^ B) \u2212 2\u00b7(~A &amp; B)',
+        lval: (a-b)&m,
+        rval: (XOR - SHL(NA & b)) & m,
+        trueVal: a - b,                    // may be negative -> wraps
+        steps: [
+          ['A ^ B', XOR],
+          ['~A &amp; B', (NA & b)&m],
+          ['2\u00b7(~A &amp; B)', SHL(NA & b)],
+          ['difference', (XOR - SHL(NA & b)) & m],
+        ],
+        note: 'The subtraction mirror of the sum identity \u2014 borrows take the place of carries.',
+        asmClean: [{mn:'sub', ops:['rax','rcx'], cm:'rax = A - B'}],
+        asmObf: [
+          {mn:'mov', ops:['rdx','rax']},
+          {mn:'xor', ops:['rdx','rcx'], obf:true, cm:'A ^ B'},
+          {mn:'not', ops:['rax'], obf:true, cm:'~A'},
+          {mn:'and', ops:['rax','rcx'], obf:true, cm:'~A & B  (the borrows)'},
+          {mn:'shl', ops:['rax',{im:'1'}], obf:true, cm:'2*(~A & B)'},
+          {mn:'sub', ops:['rdx','rax'], obf:true, cm:'(A^B) - 2*(~A&B)'},
+          {mn:'mov', ops:['rax','rdx'], cm:'= A - B'},
+        ],
+      },
+      {
+        lhs: '\u2212A', rhs: '~A + 1',
+        lval: wrap(-a),
+        rval: (NA + 1n) & m,
+        trueVal: -a,
+        steps: [
+          ['~A', NA],
+          ['~A + 1', (NA+1n)&m],
+        ],
+        note: 'Two\u2019s complement negation. A NOT followed by an INC in disassembly is almost always this.',
+        asmClean: [{mn:'neg', ops:['rax'], cm:'rax = -A'}],
+        asmObf: [
+          {mn:'not', ops:['rax'], obf:true, cm:'~A'},
+          {mn:'inc', ops:['rax'], obf:true, cm:'~A + 1  =  -A'},
+        ],
+      },
+    ];
+
+    let html = '';
+    ids.forEach(id => {
+      const ok = id.lval === id.rval;
+      // overflow when the true (un-masked) value differs from what fits in the width
+      const overflowed = id.trueVal !== id.lval;
+      let badge;
+      if (!ok){
+        badge = '\u2717 mismatch';
+      } else if (overflowed){
+        badge = `\u2713 holds : ${id.lval} <span class="wrapnote">\u2190 ${id.trueVal} mod 2<sup>${w}</sup></span>`;
+      } else {
+        badge = `\u2713 holds : ${id.lval}`;
+      }
+      html += `<div class="identity">
+        <div class="id-formula">
+          <span class="lhs">${id.lhs}</span>
+          <span class="eq">==</span>
+          <span class="rhs">${id.rhs}</span>
+          <span class="id-check ${ok?'ok':'no'}">${badge}</span>
+        </div>
+        <div class="id-body">
+          <div class="id-algebra">
+            <div class="id-col-label">worked numbers</div>
+            <div class="id-steps">`;
+      id.steps.forEach(step => {
+        const lbl = step[0], val = step[1], rawVal = step[2];
+        let extra = '';
+        if (rawVal !== undefined && rawVal !== val){
+          extra = ` <span class="wrapnote">(${rawVal} before wrap)</span>`;
+        }
+        html += `<div class="lbl">${lbl}</div><div class="num">${val.toString(10)} <span style="color:var(--ink-faint)">/ 0x${val.toString(16).toUpperCase()} / ${toBits(val,w)}</span>${extra}</div>`;
+      });
+      html += `</div></div>
+          <div class="id-asm">
+            <div class="id-asm-pair">
+              <div class="id-asm-col">
+                <div class="id-col-label clean">clean</div>
+                <div class="asm sm">${asmBlock(id.asmClean || [])}</div>
+              </div>
+              <div class="id-asm-col">
+                <div class="id-col-label obf">obfuscated</div>
+                <div class="asm sm">${asmBlock(id.asmObf || [])}</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      let note = id.note;
+      if (overflowed && ok){
+        note += ` <span class="wrapnote">At ${w}-bit width the true value ${id.trueVal} doesn\u2019t fit, so it wraps to ${id.lval} \u2014 exactly as the register would.</span>`;
+      }
+      html += `<div class="id-note">${note}</div></div>`;
+    });
+    $('mbaPanel').innerHTML = html;
+  }
+
+  // ---- disassembly view ----
+  // Small helper: format one instruction line with syntax highlighting.
+  // tokens: {mn, ops:[...], cm, obf}
+  function asmLine({mn, ops, cm, obf}){
+    const mnCls = obf ? 'obfm' : 'mn';
+    // build the plaintext "code" portion first so we can align comments by real width
+    let opsText = '';
+    let opsHtml = '';
+    if (ops && ops.length){
+      opsText = ops.map(o => (typeof o === 'object') ? o.im : o).join(', ');
+      opsHtml = ops.map(o => (typeof o === 'object')
+        ? `<span class="im">${o.im}</span>`
+        : `<span class="rg">${o}</span>`).join(', ');
+    }
+    const codeText = mn.padEnd(5) + opsText;        // e.g. "xor  rax, rcx"
+    let html = `<span class="${mnCls}">${mn.padEnd(5)}</span>${opsHtml}`;
+    if (cm){
+      const pad = ' '.repeat(Math.max(1, 18 - codeText.length));
+      html += `${pad}<span class="cm">; ${cm}</span>`;
+    }
+    return `<span class="ln">${html}</span>`;
+  }
+  function asmBlock(lines){ return lines.map(asmLine).join(''); }
+
+  function recompute(){
+    const w = state.width;
+    const ra = parseInput(inA.value, state.baseA, w);
+    const rb = parseInput(inB.value, state.baseB, w);
+
+    inA.classList.toggle('err', !!ra.err);
+    inB.classList.toggle('err', !!rb.err);
+    $('errA').textContent = ra.err === 'bad' ? `not valid for base-${state.baseA}` : ra.err === 'empty' ? 'enter a value' : '';
+    $('errB').textContent = rb.err === 'bad' ? `not valid for base-${state.baseB}` : rb.err === 'empty' ? 'enter a value' : '';
+
+    if (ra.err || rb.err) return;
+    const a = ra.val, b = rb.val;
+    const r = compute(a, b, state.op, w);
+
+    renderGrid(a, b, r, state.op, w);
+    renderResults(r, w);
+    renderExplain(a, b, state.op, w);
+    renderMBA(a, b, w);
+  }
+
+  // ---- wire up controls ----
+  $('widthSeg').addEventListener('click', e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    state.width = +btn.dataset.w;
+    [...$('widthSeg').children].forEach(c => c.classList.toggle('active', c === btn));
+    recompute();
+  });
+
+  document.querySelectorAll('.base-pick').forEach(bp => {
+    bp.addEventListener('click', e => {
+      const btn = e.target.closest('button'); if (!btn) return;
+      const target = bp.dataset.target;
+      const base = +btn.dataset.base;
+      // convert current displayed value to new base
+      const input = target === 'A' ? inA : inB;
+      const oldBase = target === 'A' ? state.baseA : state.baseB;
+      const parsed = parseInput(input.value, oldBase, state.width);
+      if (!parsed.err){
+        input.value = fmt(parsed.val, base, state.width);
+      }
+      if (target === 'A') state.baseA = base; else state.baseB = base;
+      [...bp.children].forEach(c => c.classList.toggle('active', c === btn));
+      recompute();
+    });
+  });
+
+  $('opSelect').addEventListener('click', e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    state.op = btn.dataset.op;
+    [...$('opSelect').querySelectorAll('button')].forEach(c => c.classList.toggle('active', c === btn));
+    $('opHint').textContent = ops[state.op].hint;
+    recompute();
+  });
+
+  inA.addEventListener('input', recompute);
+  inB.addEventListener('input', recompute);
+
+  // ---- column hover wiring (delegated; survives grid re-renders) ----
+  const gridEl = $('bitgrid'), inspectEl = $('inspect');
+  gridEl.addEventListener('mouseover', e => {
+    const cell = e.target.closest('[data-col]'); if (!cell) return;
+    const col = +cell.dataset.col;
+    highlightCol(col);
+    inspectEl.innerHTML = inspectText(col);
+  });
+  gridEl.addEventListener('mouseleave', () => {
+    highlightCol(null);
+    inspectEl.innerHTML = 'Hover a column to inspect a single bit.';
+  });
+
+  recompute();
+})();
+</script>
+</body>
+</html>
