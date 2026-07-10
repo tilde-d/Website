@@ -64,7 +64,7 @@ enableInlineShortcodes = true
   [params.homeInfoParams]
     Title = "Matt Swann"
     Content = """
-Cyber intelligence analyst and detection engineer. I write about turning threat intelligence into detection logic — KQL, malware analysis, and detection-as-code across the Microsoft security stack.
+I'm Matt Swann, a cyber intelligence analyst and detection engineer working across the Microsoft security stack. Most of my work sits at the seam between threat intelligence and detection engineering — turning "here's what the attacker did" into "here's the query that catches it next time." This site is where I collect the notes, tools, and write-ups that come out of that habit: I build something to solve my own problem, then write up what I learned.
 
 Browse the series below, try the [interactive tools](/tools/) I've built, or start with the latest post.
 """
@@ -101,21 +101,21 @@ Browse the series below, try the [interactive tools](/tools/) I've built, or sta
     name = "Detection Deep Dive"
     url = "/tags/detection-deep-dive/"
     weight = 10
-  [[menu.main]]
-    identifier = "raas"
-    name = "RaaS Teardown"
-    url = "/tags/raas-teardown/"
-    weight = 20
+#  [[menu.main]]
+#    identifier = "raas"
+#    name = "RaaS Teardown"
+#    url = "/tags/raas-teardown/"
+#    weight = 20
   [[menu.main]]
     identifier = "deobfuscation"
     name = "Deobfuscation Lab"
     url = "/tags/deobfuscation-lab/"
     weight = 30
-  [[menu.main]]
-    identifier = "dac"
-    name = "Detection-as-Code"
-    url = "/tags/detection-as-code/"
-    weight = 40
+#  [[menu.main]]
+#    identifier = "dac"
+#    name = "Detection-as-Code"
+#    url = "/tags/detection-as-code/"
+#    weight = 40
   [[menu.main]]
     identifier = "tools"
     name = "Tools"
