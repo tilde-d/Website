@@ -4,7 +4,6 @@ date = 2026-02-12T23:26:36-07:00
 draft = false
 summary = "A deep dive into AppDomainManager injection (T1574.014): how attackers use .NET's own extensibility model to proxy execution of malicious assemblies through legitimate signed binaries, and what defenders can — and can't — do about it."
 tags = ["deobfuscation-lab", "dotnet", "malware-analysis", "mitre-attack", "defender", "detection-engineering"]
-series = ["Deobfuscation Lab"]
 canonicalURL = "https://medium.com/@mattcswann/appdomainmanager-injection-bend-net-assemblies-to-your-will-fa41a9b15021"
 +++
 

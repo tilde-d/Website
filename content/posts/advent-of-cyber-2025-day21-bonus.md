@@ -4,7 +4,6 @@ date = 2025-12-21T23:39:55-07:00
 draft = false
 summary = "A walkthrough of the TryHackMe Advent of Cyber 2025 Day 21 bonus challenge: peeling back a multi-layer HTA payload through VBScript analysis, Base64 decoding, and XOR decryption to uncover a hidden PNG."
 tags = ["deobfuscation-lab", "malware-analysis", "vbscript", "powershell", "xor", "base64", "tryhackme"]
-series = ["Deobfuscation Lab"]
 canonicalURL = "https://medium.com/@mattcswann/advent-of-cyber-2025-day-21-malware-analysis-bonus-challenge-553b37d78530"
 +++
 

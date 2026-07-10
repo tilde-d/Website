@@ -3,8 +3,7 @@ title = "Detecting Suspicious RMM Tool Execution Chains in Microsoft Defender (T
 date = 2026-07-10T09:00:00-06:00
 draft = false
 summary = "One of the most common initial access vectors into environments by threat actors is through use of legitimate RMM tooling, offering both hands-on-keyboard access as well as stealth. Read more below for some considerations on detecting such activity."
-tags = ["detection-deep-dive", "kql", "powershell", "mitre-attack", "defender", "rmm", "ransomware"]
-series = ["Detection Deep Dive"]
+tags = ["detection-engineering", "kql", "powershell", "mitre-attack", "defender", "rmm", "ransomware"]
 +++
 
 Gone are the days where the first sign of a possible intrusion are an alert for a malicious executable - `malware.exe`, for example - being run in your environment. If your current posture fits this description, when you finally get that alert, you will find yourself playing catch-up against an attacker who is already multiple steps ahead, fighting a losing battle. We can do better.

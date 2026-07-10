@@ -3,8 +3,7 @@ title = "How a Single KQL Query Stopped an Entire EvilTokens Phishing Campaign"
 date = 2026-06-11T21:29:58-06:00
 draft = false
 summary = "An AI-powered PhaaS campaign leaned on legit-vendor redirects and device-code phishing — but spoofing left a fingerprint. One KQL query plus a 5-minute MDE automation loop neutralized over 1,200 malicious emails in 48 hours."
-tags = ["detection-deep-dive", "kql", "phishing", "detection-engineering", "sentinel", "defender"]
-series = ["Detection Deep Dive"]
+tags = ["kql", "phishing", "detection-engineering", "sentinel", "defender"]
 canonicalURL = "https://medium.com/@mattcswann/how-a-single-kql-query-stopped-an-entire-eviltokens-phishing-campaign-9b9dd4e32920"
 +++
 

@@ -97,9 +97,9 @@ Browse the series below, try the [interactive tools](/tools/) I've built, or sta
     url = "/about/"
     weight = 5
   [[menu.main]]
-    identifier = "deep-dive"
-    name = "Detection Deep Dive"
-    url = "/tags/detection-deep-dive/"
+    identifier = "detection-engineering"
+    name = "Detection Engineering"
+    url = "/tags/detection-engineering/"
     weight = 10
 #  [[menu.main]]
 #    identifier = "raas"
@@ -138,4 +138,3 @@ Browse the series below, try the [interactive tools](/tools/) I've built, or sta
 
 [taxonomies]
   tag = "tags"
-  series = "series"

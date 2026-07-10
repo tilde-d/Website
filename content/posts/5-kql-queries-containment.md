@@ -4,7 +4,6 @@ date = 2026-01-05T09:18:38-07:00
 draft = false
 summary = "In an active breach, speed is everything. These five KQL queries — covering file drops, identity compromise, lateral movement, C2 beaconing, and persistence — are designed for the first hour of incident response."
 tags = ["kql", "incident-response", "detection-engineering", "sentinel", "defender"]
-series = ["KQL Kata"]
 canonicalURL = "https://medium.com/@mattcswann/5-kql-queries-to-slash-your-containment-time-in-microsoft-sentinel-57bb81b52551"
 +++
 
