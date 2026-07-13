@@ -26,7 +26,7 @@ enableInlineShortcodes = true
     codeFences = true
     guessSyntax = true
     lineNos = false            # set true if you want line numbers on every block
-    lineNumbersInTable = true
+    lineNumbersInTable = false
     tabWidth = 2
   [markup.goldmark.renderer]
     unsafe = true              # allow raw HTML in markdown (needed for some embeds)

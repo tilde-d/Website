@@ -45,3 +45,13 @@
 .post-content h3 {
   margin-top: 1.6rem;
 }
+
+/* Needed to enable code wrapping */
+.post-content pre code,
+.post-content pre,
+.highlight pre,
+.chroma {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
