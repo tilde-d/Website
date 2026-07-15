@@ -101,11 +101,11 @@ Browse the series below, try the [interactive tools](/tools/) I've built, or sta
     name = "Detection Engineering"
     url = "/tags/detection-engineering/"
     weight = 10
-#  [[menu.main]]
-#    identifier = "raas"
-#    name = "RaaS Teardown"
-#    url = "/tags/raas-teardown/"
-#    weight = 20
+  [[menu.main]]
+    identifier = "raas"
+    name = "RaaS Teardown"
+    url = "/tags/raas-teardown/"
+    weight = 20
   [[menu.main]]
     identifier = "deobfuscation"
     name = "Deobfuscation Lab"
